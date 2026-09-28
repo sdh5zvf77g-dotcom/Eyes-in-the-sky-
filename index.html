@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Eyes in Sky" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="eyes-icons/apple-touch-icon.png" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="apple-touch-icon" sizes="180x180" href="eyes-icons/apple-touch-icon.png" />
   <link rel="icon" type="image/png" sizes="32x32" href="eyes-icons/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="eyes-icons/favicon-16.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -496,7 +496,12 @@
     <header>
       <h1 class="logo">EYES IN THE SKY</h1>
       <p class="tagline">Free live satellite cameras &amp; NASA Earth views — watch our planet from orbit in real time.</p>
-      <div class="badge-row">
+      
+    <div id="ios-tip" style="display:none;margin:0 auto 1.25rem;max-width:480px;padding:0.75rem 1rem;background:rgba(59,158,255,0.12);border:1px solid rgba(59,158,255,0.35);border-radius:12px;font-size:0.85rem;color:#cfe6ff;text-align:center;">
+      <strong>iPhone:</strong> Tap the Share button → <strong>Add to Home Screen</strong> to install this app with the alien icon.
+    </div>
+
+    <div class="badge-row">
         <span class="badge live">Live Feeds</span>
         <span class="badge">NASA · ISS · Sen · USGS · NOAA</span>
         <span class="badge">100% Free</span>
@@ -791,6 +796,14 @@
         navigator.serviceWorker.register("./sw.js").catch(() => {});
       });
     }
+
+    // Show install tip on iPhone Safari (not already installed)
+    (function () {
+      const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      const standalone = window.navigator.standalone === true || window.matchMedia("(display-mode: standalone)").matches;
+      const tip = document.getElementById("ios-tip");
+      if (tip && isIos && !standalone) tip.style.display = "block";
+    })();
   </script>
 </body>
 </html>

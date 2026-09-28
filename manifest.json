@@ -1,0 +1,37 @@
+{
+  "name": "Eyes in the Sky",
+  "short_name": "Eyes in Sky",
+  "description": "Free live satellite cameras and NASA Earth views from the ISS and orbit.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#05080f",
+  "theme_color": "#0c1220",
+  "icons": [
+    {
+      "src": "eyes-icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "eyes-icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "eyes-icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "eyes-icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
