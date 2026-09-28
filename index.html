@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Eyes in the Sky — Live Satellite & NASA Camera Feeds</title>
+  <meta name="description" content="Watch free live satellite cameras and NASA Earth views from the ISS, Worldview, and more." />
+  <meta name="theme-color" content="#0c1220" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Eyes in Sky" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="eyes-icons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="eyes-icons/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="eyes-icons/favicon-16.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #05080f;
+      --bg-card: #0c1220;
+      --bg-card-hover: #121a2e;
+      --border: #1e2a44;
+      --text: #e8f0ff;
+      --text-muted: #8b9bb8;
+      --accent: #3b9eff;
+      --accent-glow: rgba(59, 158, 255, 0.35);
+      --live: #ff3b5c;
+      --live-glow: rgba(255, 59, 92, 0.45);
+      --success: #2dd4a8;
+      --radius: 14px;
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+      background-image:
+        radial-gradient(ellipse 120% 80% at 50% -20%, rgba(30, 60, 120, 0.35), transparent),
+        radial-gradient(ellipse 60% 40% at 90% 80%, rgba(20, 40, 90, 0.2), transparent);
+    }
+
+    /* Stars */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 20px 30px, #fff, transparent),
+        radial-gradient(1px 1px at 80px 120px, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1.5px 1.5px at 160px 60px, #fff, transparent),
+        radial-gradient(1px 1px at 240px 180px, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1px 1px at 320px 90px, #fff, transparent),
+        radial-gradient(1.5px 1.5px at 400px 220px, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1px 1px at 480px 40px, #fff, transparent),
+        radial-gradient(1px 1px at 560px 150px, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1.5px 1.5px at 640px 100px, #fff, transparent),
+        radial-gradient(1px 1px at 720px 200px, rgba(255,255,255,0.5), transparent);
+      background-size: 800px 250px;
+      pointer-events: none;
+      opacity: 0.4;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 3rem;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      padding-top: 1rem;
+    }
+
+    .logo {
+      font-family: "Orbitron", sans-serif;
+      font-weight: 700;
+      font-size: clamp(1.75rem, 5vw, 2.75rem);
+      letter-spacing: 0.04em;
+      background: linear-gradient(135deg, #fff 0%, #7eb8ff 50%, #3b9eff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.4rem;
+    }
+
+    .tagline {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 520px;
+      margin: 0 auto 1.25rem;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      background: rgba(59, 158, 255, 0.12);
+      border: 1px solid rgba(59, 158, 255, 0.3);
+      color: var(--accent);
+    }
+
+    .badge.live {
+      background: rgba(255, 59, 92, 0.12);
+      border-color: rgba(255, 59, 92, 0.35);
+      color: #ff6b85;
+    }
+
+    .badge.live::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--live);
+      box-shadow: 0 0 8px var(--live-glow);
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-bottom: 1.75rem;
+    }
+
+    .tab {
+      padding: 0.55rem 1.15rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .tab:hover {
+      background: var(--bg-card-hover);
+      color: var(--text);
+      border-color: #2a3a5c;
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, rgba(59, 158, 255, 0.25), rgba(59, 158, 255, 0.1));
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    /* Sections */
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-title {
+      font-family: "Orbitron", sans-serif;
+      font-size: 1.15rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-title span {
+      font-size: 0.75rem;
+      font-family: "Inter", sans-serif;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.06);
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+    }
+
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .grid.featured {
+      grid-template-columns: 1fr;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (min-width: 900px) {
+      .grid.featured {
+        grid-template-columns: 1.4fr 1fr;
+      }
+    }
+
+    /* Card */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: border-color 0.2s, transform 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card:hover {
+      border-color: #2a3a5c;
+    }
+
+    .card.featured {
+      min-height: 100%;
+    }
+
+    .card-header {
+      padding: 0.9rem 1.1rem 0.6rem;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .card-title {
+      font-weight: 600;
+      font-size: 1rem;
+      line-height: 1.3;
+    }
+
+    .card-source {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    .live-dot {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #ff6b85;
+      background: rgba(255, 59, 92, 0.12);
+      padding: 0.25rem 0.55rem;
+      border-radius: 6px;
+    }
+
+    .live-dot::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--live);
+      box-shadow: 0 0 6px var(--live-glow);
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    .card-body {
+      position: relative;
+      width: 100%;
+      background: #000;
+      aspect-ratio: 16 / 9;
+      flex: 1;
+    }
+
+    .card-body iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .card-body .placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      background: linear-gradient(160deg, #0a1628 0%, #0c1220 100%);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 1.5rem;
+    }
+
+    .card-body .placeholder a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.5rem;
+      padding: 0.55rem 1.1rem;
+      background: linear-gradient(135deg, #3b9eff, #2563eb);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.875rem;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .card-body .placeholder a:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px var(--accent-glow);
+    }
+
+    .card-footer {
+      padding: 0.7rem 1.1rem 0.9rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.4rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+
+    .btn:hover {
+      background: rgba(59, 158, 255, 0.15);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, #3b9eff, #2563eb);
+      border-color: transparent;
+      color: #fff;
+    }
+
+    .btn.primary:hover {
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+
+    /* Info cards (non-video) */
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.1rem;
+    }
+
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      transition: border-color 0.2s, transform 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .info-card:hover {
+      border-color: #2a3a5c;
+      transform: translateY(-2px);
+    }
+
+    .info-card h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .info-card p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      flex: 1;
+    }
+
+    .info-card .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.25rem;
+    }
+
+    .tag {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 5px;
+      background: rgba(59, 158, 255, 0.12);
+      color: var(--accent);
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    .note {
+      margin-top: 0.75rem;
+      max-width: 640px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.55;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 class="logo">EYES IN THE SKY</h1>
+      <p class="tagline">Free live satellite cameras &amp; NASA Earth views — watch our planet from orbit in real time.</p>
+      <div class="badge-row">
+        <span class="badge live">Live Feeds</span>
+        <span class="badge">NASA · ISS · Sen · USGS · NOAA</span>
+        <span class="badge">100% Free</span>
+      </div>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="live" role="tab" aria-selected="true">Live Cameras</button>
+      <button class="tab" data-tab="imagery" role="tab" aria-selected="false">Satellite Imagery</button>
+      <button class="tab" data-tab="explore" role="tab" aria-selected="false">Explore More</button>
+    </nav>
+
+    <!-- LIVE CAMERAS -->
+    <section id="live" class="section active" role="tabpanel">
+      <h2 class="section-title">Live Cameras <span>from orbit</span></h2>
+
+      <div class="grid featured">
+        <!-- NASA ISS HD -->
+        <article class="card featured">
+          <div class="card-header">
+            <div>
+              <div class="card-title">NASA ISS High-Definition Earth View</div>
+              <div class="card-source">Official NASA Stream · Harmony module camera</div>
+            </div>
+            <span class="live-dot">Live</span>
+          </div>
+          <div class="card-body">
+            <iframe
+              src="https://www.youtube.com/embed/awQzjn72bI0?autoplay=0&rel=0"
+              title="NASA ISS High-Definition Views"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+              loading="lazy"
+            ></iframe>
+          </div>
+          <div class="card-footer">
+            <p class="card-desc">External camera on the ISS Harmony module looking at Earth and the docking adapter. Falls back to recorded views when offline.</p>
+            <a class="btn" href="https://www.youtube.com/watch?v=awQzjn72bI0" target="_blank" rel="noopener">Open on YouTube</a>
+          </div>
+        </article>
+
+        <!-- Sen 4K -->
+        <article class="card featured">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Sen 4K Earth Livestream</div>
+              <div class="card-source">Sen cameras on ISS · 4K via NASA downlink</div>
+            </div>
+            <span class="live-dot">Live</span>
+          </div>
+          <div class="card-body">
+            <iframe
+              src="https://www.youtube.com/embed/fO9e9jnhYK8?autoplay=0&rel=0"
+              title="Sen 4K Earth from ISS"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+              loading="lazy"
+            ></iframe>
+          </div>
+          <div class="card-footer">
+            <p class="card-desc">World’s first continuous 4K livestream from space. Horizon, nadir, and docking views of Earth from the ISS.</p>
+            <a class="btn" href="https://www.youtube.com/watch?v=fO9e9jnhYK8" target="_blank" rel="noopener">Open on YouTube</a>
+          </div>
+        </article>
+      </div>
+
+      <div class="grid">
+        <!-- NASA ISS Live Video -->
+        <article class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">NASA ISS Live Video</div>
+              <div class="card-source">Official NASA Stream · Inside &amp; outside views</div>
+            </div>
+            <span class="live-dot">Live</span>
+          </div>
+          <div class="card-body">
+            <iframe
+              src="https://www.youtube.com/embed/M3HKLzjvKPc?autoplay=0&rel=0"
+              title="NASA ISS Live Video"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+              loading="lazy"
+            ></iframe>
+          </div>
+          <div class="card-footer">
+            <p class="card-desc">Live video from the International Space Station, including crew activity when available.</p>
+            <a class="btn" href="https://www.youtube.com/watch?v=M3HKLzjvKPc" target="_blank" rel="noopener">Open on YouTube</a>
+          </div>
+        </article>
+
+        <!-- NASA Live / Events -->
+        <article class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">NASA Live Events</div>
+              <div class="card-source">nasa.gov/live · Launches, briefings, spacewalks</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="placeholder">
+              <div>🚀</div>
+              <div>Official schedule of NASA live programming, launches, and space station events.</div>
+              <a href="https://www.nasa.gov/live/" target="_blank" rel="noopener">Open NASA Live →</a>
+            </div>
+          </div>
+          <div class="card-footer">
+            <p class="card-desc">Check for scheduled live coverage when major events are underway.</p>
+            <a class="btn" href="https://www.nasa.gov/live/" target="_blank" rel="noopener">Visit</a>
+          </div>
+        </article>
+
+        <!-- NASA+ -->
+        <article class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">NASA+</div>
+              <div class="card-source">Free streaming · Documentaries &amp; live</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="placeholder">
+              <div>📺</div>
+              <div>NASA’s free on-demand streaming service with live missions and original content.</div>
+              <a href="https://plus.nasa.gov/" target="_blank" rel="noopener">Open NASA+ →</a>
+            </div>
+          </div>
+          <div class="card-footer">
+            <p class="card-desc">No subscription required. Available on web, apps, and streaming devices.</p>
+            <a class="btn" href="https://plus.nasa.gov/" target="_blank" rel="noopener">Visit</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- SATELLITE IMAGERY -->
+    <section id="imagery" class="section" role="tabpanel">
+      <h2 class="section-title">Near Real-Time Satellite Imagery <span>updated within hours</span></h2>
+
+      <div class="info-grid">
+        <article class="info-card">
+          <h3>NASA Worldview</h3>
+          <p>Browse 1,000+ global satellite imagery layers (MODIS, VIIRS, Sentinel, and more). Many layers update within 1–3 hours of observation — essentially Earth “as it looks right now.”</p>
+          <div class="tags">
+            <span class="tag">Near real-time</span>
+            <span class="tag">Full resolution</span>
+            <span class="tag">Animate &amp; compare</span>
+          </div>
+          <a class="btn primary" href="https://worldview.earthdata.nasa.gov/" target="_blank" rel="noopener" style="margin-top:0.5rem;align-self:flex-start">Open Worldview →</a>
+        </article>
+
+        <article class="info-card">
+          <h3>USGS EarthNow!</h3>
+          <p>Watch near real-time imagery as Landsat satellites pass over Earth. Strips of data appear on the globe almost as they are received — a unique “through the satellite’s eyes” experience.</p>
+          <div class="tags">
+            <span class="tag">Landsat</span>
+            <span class="tag">Near real-time</span>
+            <span class="tag">USGS</span>
+          </div>
+          <a class="btn primary" href="https://earthnow.usgs.gov/observer/" target="_blank" rel="noopener" style="margin-top:0.5rem;align-self:flex-start">Open EarthNow →</a>
+        </article>
+
+        <article class="info-card">
+          <h3>NOAA Earth in Real-Time</h3>
+          <p>Interactive 3D globe with live weather satellite imagery from GOES-East and GOES-West. Clouds, storms, and atmospheric conditions updated continuously.</p>
+          <div class="tags">
+            <span class="tag">Weather</span>
+            <span class="tag">GOES</span>
+            <span class="tag">Interactive</span>
+          </div>
+          <a class="btn primary" href="https://www.nesdis.noaa.gov/imagery/interactive-maps/earth-real-time" target="_blank" rel="noopener" style="margin-top:0.5rem;align-self:flex-start">Open NOAA →</a>
+        </article>
+
+        <article class="info-card">
+          <h3>EUMETSAT Earth View</h3>
+          <p>Near real-time views from Meteosat geostationary satellites over Europe, Africa, and the Indian Ocean. Natural color, infrared, airmass, and dust products updated every 10–15 minutes.</p>
+          <div class="tags">
+            <span class="tag">Meteosat</span>
+            <span class="tag">Europe / Africa</span>
+            <span class="tag">Embeddable</span>
+          </div>
+          <a class="btn primary" href="https://www.eumetsat.int/real-time-imagery/earth-view" target="_blank" rel="noopener" style="margin-top:0.5rem;align-self:flex-start">Open EUMETSAT →</a>
+        </article>
+
+        <article class="info-card">
+          <h3>Zoom Earth</h3>
+          <p>Free interactive map combining near real-time weather imagery from multiple satellites (GOES, Meteosat, Himawari, MODIS) updated every 10–15 minutes.</p>
+          <div class="tags">
+            <span class="tag">Global</span>
+            <span class="tag">Weather</span>
+            <span class="tag">Free</span>
+          </div>
+          <a class="btn primary" href="https://zoom.earth/" target="_blank" rel="noopener" style="margin-top:0.5rem;align-self:flex-start">Open Zoom Earth →</a>
+        </article>
+
+        <article class="info-card">
+          <h3>NASA Eyes on the Earth</h3>
+          <p>Immersive 3D visualization of NASA Earth-observing satellites. Track the ISS, monitor vital signs like CO₂ and sea level, and fly along with active missions.</p>
+          <div class="tags">
+            <span class="tag">3D</span>
+            <span class="tag">Satellites</span>
+            <span class="tag">Vital signs</span>
+          </div>
+          <a class="btn primary" href="https://eyes.nasa.gov/apps/earth/" target="_blank" rel="noopener" style="margin-top:0.5rem;align-self:flex-start">Open NASA Eyes →</a>
+        </article>
+      </div>
+    </section>
+
+    <!-- EXPLORE MORE -->
+    <section id="explore" class="section" role="tabpanel">
+      <h2 class="section-title">More Free Space Tools <span>track · learn · explore</span></h2>
+
+      <div class="info-grid">
+        <article class="info-card">
+          <h3>Spot the Station</h3>
+          <p>Official NASA app and website to see when the ISS will be visible from your location. Get alerts so you can look up and wave to the crew.</p>
+          <a class="btn primary" href="https://www.nasa.gov/spot-the-station/" target="_blank" rel="noopener" style="margin-top:0.5rem;align-self:flex-start">Spot the Station →</a>
+        </article>
+
+        <article class="info-card">
+          <h3>NASA Earth Now</h3>
+          <p>Mobile app showing the latest data from NASA’s Earth-observing satellite fleet — storms, carbon monoxide, and more vital signs of the planet.</p>
+          <a class="btn primary" href="https://science.nasa.gov/eyes/earth-now/" target="_blank" rel="noopener" style="margin-top:0.5rem;align-self:flex-start">Learn more →</a>
+        </article>
+
+        <article class="info-card">
+          <h3>NASA Eyes (Full Suite)</h3>
+          <p>Explore Earth, the solar system, asteroids, and spacecraft in real-time 3D. Includes Eyes on the Solar System and Eyes on Asteroids.</p>
+          <a class="btn primary" href="https://eyes.nasa.gov/" target="_blank" rel="noopener" style="margin-top:0.5rem;align-self:flex-start">Open Eyes →</a>
+        </article>
+
+        <article class="info-card">
+          <h3>Worldview Snapshots</h3>
+          <p>Lightweight tool to quickly generate and download daily satellite image snapshots of any place on Earth from popular NASA layers.</p>
+          <a class="btn primary" href="https://wvs.earthdata.nasa.gov/" target="_blank" rel="noopener" style="margin-top:0.5rem;align-self:flex-start">Open Snapshots →</a>
+        </article>
+
+        <article class="info-card">
+          <h3>Sen.com</h3>
+          <p>Sen’s own site for their 4K ISS livestream, recorded highlights, and more about their space video cameras.</p>
+          <a class="btn primary" href="https://www.sen.com" target="_blank" rel="noopener" style="margin-top:0.5rem;align-self:flex-start">Visit Sen →</a>
+        </article>
+
+        <article class="info-card">
+          <h3>NASA App</h3>
+          <p>Official NASA mobile app — news, images, podcasts, NASA+ streaming, and space station views in one place.</p>
+          <a class="btn primary" href="https://www.nasa.gov/app/" target="_blank" rel="noopener" style="margin-top:0.5rem;align-self:flex-start">Get the App →</a>
+        </article>
+      </div>
+    </section>
+
+    <footer>
+      <p><strong>Eyes in the Sky</strong> — free aggregator of public NASA and partner satellite camera feeds.</p>
+      <p class="note">
+        All live video and imagery are provided by NASA, USGS, NOAA, EUMETSAT, Sen, and other public sources.
+        Feeds may go offline during signal handovers, night-side orbits, or operational constraints.
+        This is an unofficial fan-made dashboard — not affiliated with NASA.
+      </p>
+      <p style="margin-top:1rem">
+        Sources:
+        <a href="https://www.nasa.gov" target="_blank" rel="noopener">NASA</a> ·
+        <a href="https://worldview.earthdata.nasa.gov/" target="_blank" rel="noopener">Worldview</a> ·
+        <a href="https://www.youtube.com/@NASA" target="_blank" rel="noopener">NASA YouTube</a> ·
+        <a href="https://www.youtube.com/@Sen" target="_blank" rel="noopener">Sen</a>
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    const tabs = document.querySelectorAll(".tab");
+    const sections = document.querySelectorAll(".section");
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const target = tab.dataset.tab;
+
+        tabs.forEach((t) => {
+          t.classList.remove("active");
+          t.setAttribute("aria-selected", "false");
+        });
+        sections.forEach((s) => s.classList.remove("active"));
+
+        tab.classList.add("active");
+        tab.setAttribute("aria-selected", "true");
+        document.getElementById(target).classList.add("active");
+      });
+    });
+
+    // Register service worker for PWA / offline shell
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
